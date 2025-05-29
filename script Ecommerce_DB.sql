@@ -33,3 +33,22 @@ create table DatosUsuarios(
 	NumTelefono VARCHAR(20) not null, 
 	Direccion VARCHAR(100) not null
 )
+
+create table Categorias(
+	IdCategoria int not null primary key identity(1, 1),
+	Nombre varchar(50) not null unique
+)
+
+create table Marcas(
+	IdMarca int not null primary key identity(1, 1),
+	Nombre varchar(50) not null unique
+)
+
+create table Productos(
+	IdProducto int not null primary key identity(1, 1),
+	Nombre varchar(100) not null,
+	Precio money not null,
+	Stock int not null,
+	IdCategoria int not null foreign key references Categorias(IdCategoria),
+	IdMarca int not null foreign key references Marcas(IdMarca)
+)
