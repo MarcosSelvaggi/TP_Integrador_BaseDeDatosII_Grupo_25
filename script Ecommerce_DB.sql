@@ -49,6 +49,7 @@ create table Productos(
 	Nombre varchar(100) not null,
 	Precio money not null,
 	Stock int not null,
+	Estado bit not null,
 	IdCategoria int not null foreign key references Categorias(IdCategoria),
 	IdMarca int not null foreign key references Marcas(IdMarca)
 )
@@ -83,6 +84,6 @@ create table DetallePedidos (
     IdProducto int foreign key references Productos(IdProducto),
     Cantidad tinyint,
     PrecioUnitario money,
-    primary key (IdCliente, IdPedido)
-    --primary key (IdPedido, IdProducto)
+    primary key (IdPedido, IdProducto)
+    --primary key (IdCliente, IdPedido)
 )
