@@ -16,18 +16,14 @@ create table Rol(
 insert into Rol values ('Administrador')
 insert into Rol values ('Usuario')
 
-create table Usuarios(
+create table Clientes(
 	IdCliente int not null primary key identity(1,1),
 	CorreoElectronico NVARCHAR(100) not null, 
 	Contraseña VARCHAR(50) not null,
 	IdRol tinyint not null foreign key references Rol(IdRol),
 	Estado bit not null, 
-	FechaCreacion date not null
-)
-
-create table DatosUsuarios(
-	Documento int not null primary key, 
-	IdCliente int not null unique foreign key references Usuarios(IdCliente), 
+	FechaCreacion date not null,
+	Documento int not null unique, 
 	Nombre VARCHAR(100) not null, 
 	Apellido VARCHAR(100) not null,
 	NumTelefono VARCHAR(20) not null, 
@@ -47,9 +43,11 @@ create table Marcas(
 create table Productos(
 	IdProducto int not null primary key identity(1, 1),
 	Nombre varchar(100) not null,
-	Precio money not null,
 	Stock int not null,
-	Estado bit not null,
+	PrecioSinIva money not null,
+	PrecioConIva money not null,
+	PorcentajeIVA tinyint not null,
+	Activo bit not null,
 	IdCategoria int not null foreign key references Categorias(IdCategoria),
 	IdMarca int not null foreign key references Marcas(IdMarca)
 )
@@ -71,19 +69,19 @@ create table EstadoEnvio (
 
 create table Pedidos (
     IdPedido bigint primary key,
-    IdCliente int foreign key references Usuarios(IdCliente),
+    IdCliente int foreign key references Clientes(IdCliente),
     FechaPedido date not null default Getdate(),
     IdEstadoPedido tinyint foreign key references EstadosPedidos(IdEstadoPedido),
     IdMetodoPago tinyint foreign key references MetodosPagos(IdMetodoPago),
-    IdEnvio TINYINT foreign key references EstadoEnvio(IdEnvio)
+    IdEnvio TINYINT foreign key references EstadoEnvio(IdEnvio),
+	PrecioTotal money not null
 )
 
 create table DetallePedidos (
-    IdCliente int foreign key references Usuarios(IdCliente),
     IdPedido bigint foreign key references Pedidos(IdPedido),
     IdProducto int foreign key references Productos(IdProducto),
-    Cantidad tinyint,
-    PrecioUnitario money,
+    Cantidad tinyint not null,
+    PrecioUnitario money not null,
+	Subtotal money not null,
     primary key (IdPedido, IdProducto)
-    --primary key (IdCliente, IdPedido)
 )
