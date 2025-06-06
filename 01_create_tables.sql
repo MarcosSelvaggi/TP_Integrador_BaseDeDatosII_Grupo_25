@@ -13,12 +13,9 @@ create table Rol(
 	Descripcion VARCHAR(25) not null
 )
 
-insert into Rol values ('Administrador')
-insert into Rol values ('Usuario')
-
 create table Clientes(
 	IdCliente int not null primary key identity(1,1),
-	CorreoElectronico NVARCHAR(100) not null, 
+	CorreoElectronico NVARCHAR(100) not null unique, 
 	Contraseña VARCHAR(50) not null,
 	IdRol tinyint not null foreign key references Rol(IdRol),
 	Estado bit not null, 
@@ -26,7 +23,7 @@ create table Clientes(
 	Documento int not null unique, 
 	Nombre VARCHAR(100) not null, 
 	Apellido VARCHAR(100) not null,
-	NumTelefono VARCHAR(20) not null, 
+	NumTelefono VARCHAR(20) not null unique, 
 	Direccion VARCHAR(100) not null
 )
 
