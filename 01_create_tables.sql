@@ -60,7 +60,7 @@ create table MetodosPagos (
 )
 
 create table EstadosEnvio (
-    IdEnvio tinyint primary key,
+    IdEnvio tinyint primary key identity(1,1),
     Descripcion varchar(100) not null unique
 )
 
