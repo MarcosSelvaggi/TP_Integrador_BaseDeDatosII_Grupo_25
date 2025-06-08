@@ -16,7 +16,7 @@ create procedure SP_AgregarCliente (
 begin
 	begin try
 		insert into
-		Clientes (CorreoElectronico, Contraseña, IdRol, Estado, FechaCreacion, Documento, Nombre, Apellido, NumTelefono, Direccion)
+		Clientes (CorreoElectronico, Contraseña, IdRol, Activo, FechaCreacion, Documento, Nombre, Apellido, NumTelefono, Direccion)
         values (
             @CorreoElectronico, @Contraseña, @IdRol, @Estado, @FechaCreacion, @Documento, @Nombre, @Apellido, @NumTelefono, @Direccion);
 
@@ -28,3 +28,20 @@ begin
 end
 
 exec SP_AgregarCliente 'lologuitar@gmail.com', '123456', 1, 1, '2025-09-09', 123456789, 'Moloc', 'Suarez', '212314', 'Calle bella 14';
+go
+
+create or alter procedure sp_registrarPedido(
+	@IdCliente int, 
+	@IdMetodoPago tinyint 
+	) as 
+BEGIN
+	begin try 
+		insert into Pedidos 
+		values (@IdCliente, GETDATE(), 1, @IdMetodoPago, 1, 0)
+	end try
+	begin catch 
+		raiserror('Error al registrar el pedido', 16, 2)
+	end catch 
+END
+
+exec sp_registrarPedido 2, 1 
