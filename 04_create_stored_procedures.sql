@@ -26,7 +26,7 @@ begin
         raiserror('Error al agregar el cliente',16, 1);
     end catch
 end
-
+go
 exec SP_AgregarCliente 'lologuitar@gmail.com', '123456', 1, 1, '2025-09-09', 123456789, 'Moloc', 'Suarez', '212314', 'Calle bella 14';
 go
 
@@ -43,5 +43,36 @@ BEGIN
 		raiserror('Error al registrar el pedido', 16, 2)
 	end catch 
 END
-
+GO
 exec sp_registrarPedido 2, 1 
+
+GO
+create or alter procedure SP_InsertarProducto
+    @IdCategoria int,
+    @IdMarca int,
+    @Nombre varchar(100),
+    @Stock int,
+    @PrecioSinIva money,
+    @PorcentajeIVA tinyint,
+    @Activo bit
+as
+begin
+    begin try
+		begin transaction
+			declare @PrecioConIva money
+			--Calcula el PrecioConIva
+			set @PrecioConIva = @PrecioSinIva * (1 + (@PorcentajeIVA / 100.0))
+			--Inserta el Producto con sus datos y el PrecioConIva calculado
+			insert into Productos (IdCategoria, IdMarca, Nombre, Stock, PrecioSinIva, PrecioConIva, PorcentajeIVA, Activo)
+			values (@IdCategoria, @IdMarca, @Nombre, @Stock, @PrecioSinIva, @PrecioConIva, @PorcentajeIVA, @Activo)
+
+			commit transaction
+			print 'Producto insertado correctamente.'
+    end try
+    begin catch
+        raiserror('Error al insertar el producto', 16, 1)
+        rollback transaction
+    end catch
+end;
+GO
+exec SP_InsertarProducto 1, 1, 'Silla de escritorio', 10, 100, 21, 1

@@ -70,7 +70,6 @@ insert into EstadosEnvio values
 ('Entregado'),
 ('Retrasado'); 
 
-
 --Me los dió así, después los acomodo (O no)
 INSERT INTO Pedidos (IdCliente, FechaPedido, IdEstadoPedido, IdMetodoPago, IdEnvio, PrecioTotal) VALUES (5, '2025-05-01', 2, 1, 3, 2499.99);
 INSERT INTO Pedidos (IdCliente, FechaPedido, IdEstadoPedido, IdMetodoPago, IdEnvio, PrecioTotal) VALUES (1, '2025-05-03', 1, 3, 2, 850.50);
@@ -104,3 +103,8 @@ INSERT INTO Pedidos (IdCliente, FechaPedido, IdEstadoPedido, IdMetodoPago, IdEnv
 INSERT INTO Pedidos (IdCliente, FechaPedido, IdEstadoPedido, IdMetodoPago, IdEnvio, PrecioTotal) VALUES (10, '2025-05-25', 3, 1, 1, 980.80);
 INSERT INTO Pedidos (IdCliente, FechaPedido, IdEstadoPedido, IdMetodoPago, IdEnvio, PrecioTotal) VALUES (8, '2025-05-26', 2, 4, 2, 210.00);
 INSERT INTO Pedidos (IdCliente, FechaPedido, IdEstadoPedido, IdMetodoPago, IdEnvio, PrecioTotal) VALUES (4, '2025-05-27', 1, 3, 3, 745.20);
+
+--Detalle de Pedidos SIN Subtotal
+insert into DetallePedidos (IdPedido, IdProducto, Cantidad, PrecioUnitario) values 
+(2, 1, 3, 100),
+(2, 3, 2, 1000);

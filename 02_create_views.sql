@@ -23,3 +23,16 @@ select
 	group by MP.Descripcion
 GO 
 Select * from VW_PedidosPorMetodosDePago
+GO
+
+--Vista de Productos más vendidos
+create or alter view VW_ProductosMasVendidos as
+select 
+    p.IdProducto,
+    p.Nombre,
+    sum(dp.Cantidad) as TotalVendido
+from DetallePedidos dp
+inner join Productos p on p.IdProducto = dp.IdProducto
+group by p.IdProducto, p.Nombre
+GO
+select * from VW_ProductosMasVendidos

@@ -18,34 +18,6 @@ end
 delete Clientes where IdCliente = 15
 
 go
-
-create or alter trigger TR_InsertarDetallePedido on DetallePedidos 
-after insert 
-as 
---Inicio TR 
-BEGIN
-	--Inicio de transacción 
-	begin transaction 
-		--Inicio de Try
-		begin try
-			update Pedidos set PrecioTotal = PrecioTotal + (select Subtotal from inserted) 
-			where IdPedido = (select IdPedido from inserted) ;
-
-			update Productos set Stock = Stock - (select cantidad from inserted)
-			where IdProducto = (select IdProducto from inserted);
-		end try 
-		--Inicio de catch 
-		begin catch 
-			rollback
-			raiserror('Error al intentar agregar el pedido al historial', 16, 3)
-			return 
-		end catch 
-		--Fin de catch
-		commit transaction
-END 
---Fin TR 
-
-go
 create or alter trigger TR_DevolverStock on Pedidos
 after update 
 as 
@@ -93,3 +65,38 @@ BEGIN
 		--Fin If 
 END 
 --Fin TR
+GO
+--Trigger encargado de actualizar el Subtotal, el PrecioTotal y el Stock
+create or alter trigger TR_ActualizarSubtotalPrecioTotalYStock
+on DetallePedidos
+after insert, update
+as
+begin
+    begin try
+		-- Actualiza Subtotal en DetallePedidos
+		update dp
+		set Subtotal = dp.Cantidad * dp.PrecioUnitario
+		from DetallePedidos dp
+		inner join inserted i on dp.IdPedido = i.IdPedido and dp.IdProducto = i.IdProducto
+
+		-- Actualiza PrecioTotal en Pedidos
+		update p
+		set PrecioTotal = (
+			select sum(Subtotal)
+			from DetallePedidos
+			where IdPedido = p.IdPedido
+		)
+		from Pedidos p
+		inner join inserted i on p.IdPedido = i.IdPedido
+
+		-- Actualiza Stock en Productos
+		update pr
+		set pr.Stock = pr.Stock - i.Cantidad
+		from Productos pr
+		inner join inserted i 
+		on pr.IdProducto = i.IdProducto;
+    end try
+    begin catch
+		raiserror('Error en trigger ActualizarSubtotalYPrecioTotal', 16, 1)
+	end catch
+end;

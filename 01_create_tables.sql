@@ -39,12 +39,12 @@ create table Marcas(
 
 create table Productos(
 	IdProducto int primary key identity(1, 1),
-        IdCategoria int not null foreign key references Categorias(IdCategoria),
+    IdCategoria int not null foreign key references Categorias(IdCategoria),
 	IdMarca int not null foreign key references Marcas(IdMarca),
-	Nombre varchar(100) not null,
+	Nombre varchar(100) not null unique,
 	Stock int not null check (Stock >= 0),
 	PrecioSinIva money not null,
-	PrecioConIva money not null,
+	PrecioConIva money null,
 	PorcentajeIVA tinyint not null check (PorcentajeIVA between 0 and 100),
 	Activo bit not null default 1
 )
@@ -71,7 +71,7 @@ create table Pedidos (
     IdEstadoPedido tinyint foreign key references EstadosPedidos(IdEstadoPedido),
     IdMetodoPago tinyint foreign key references MetodosPagos(IdMetodoPago),
     IdEnvio TINYINT foreign key references EstadosEnvio(IdEnvio),
-    PrecioTotal money not null
+    PrecioTotal money null
 )
 
 create table DetallePedidos (
@@ -79,6 +79,6 @@ create table DetallePedidos (
     IdProducto int not null foreign key references Productos(IdProducto),
     Cantidad tinyint not null check (Cantidad >= 1),
     PrecioUnitario money not null,
-    Subtotal money not null,
+    Subtotal money null,
     primary key (IdPedido, IdProducto)
 )
