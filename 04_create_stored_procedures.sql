@@ -52,19 +52,19 @@ create or alter procedure SP_InsertarProducto
     @IdMarca int,
     @Nombre varchar(100),
     @Stock int,
-    @PrecioSinIva money,
-    @PorcentajeIVA tinyint,
+    @PrecioSinImpuestos money,
+    @PorcentajeImpuestos tinyint,
     @Activo bit
 as
 begin
     begin try
 		begin transaction
-			declare @PrecioConIva money
+			declare @PrecioConImpuestos money
 			--Calcula el PrecioConIva
-			set @PrecioConIva = @PrecioSinIva * (1 + (@PorcentajeIVA / 100.0))
+			set @PrecioConImpuestos = @PrecioSinImpuestos * (1 + (@PorcentajeImpuestos / 100.0))
 			--Inserta el Producto con sus datos y el PrecioConIva calculado
-			insert into Productos (IdCategoria, IdMarca, Nombre, Stock, PrecioSinIva, PrecioConIva, PorcentajeIVA, Activo)
-			values (@IdCategoria, @IdMarca, @Nombre, @Stock, @PrecioSinIva, @PrecioConIva, @PorcentajeIVA, @Activo)
+			insert into Productos (IdCategoria, IdMarca, Nombre, Stock, PrecioSinImpuestos, PrecioConImpuestos, Impuestos, Activo)
+			values (@IdCategoria, @IdMarca, @Nombre, @Stock, @PrecioSinImpuestos, @PrecioConImpuestos, @PorcentajeImpuestos, @Activo)
 
 			commit transaction
 			print 'Producto insertado correctamente.'

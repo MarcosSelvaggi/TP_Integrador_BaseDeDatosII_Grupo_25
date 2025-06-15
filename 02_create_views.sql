@@ -19,7 +19,7 @@ create or alter view VW_PedidosPorMetodosDePago as
 select 
 	MP.Descripcion ,count(*) as 'Cantidad'
 	from Pedidos P 
-	Inner join MetodosPagos MP on P.IdMetodoPago = MP.IdMetodoPago
+	Inner join MetodoDePagos MP on P.IdMetodoPago = MP.IdMetodoPago
 	group by MP.Descripcion
 GO 
 Select * from VW_PedidosPorMetodosDePago
@@ -31,7 +31,7 @@ select
     p.IdProducto,
     p.Nombre,
     sum(dp.Cantidad) as TotalVendido
-from DetallePedidos dp
+from DetalleDePedidos dp
 inner join Productos p on p.IdProducto = dp.IdProducto
 group by p.IdProducto, p.Nombre
 GO
