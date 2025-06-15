@@ -57,7 +57,7 @@ create table Productos (
     Nombre varchar(100) not null unique,
     Stock int not null check (stock >= 0),
     PrecioSinImpuestos money not null,
-    PrecioConImpuestos money not null,
+    PrecioConImpuestos money null,
     Impuestos tinyint not null default 21 check (Impuestos between 0 and 100),
     Activo bit not null default 1
 )
@@ -92,7 +92,7 @@ create table Pedidos (
     IDEnvio int not null foreign key references EstadoDeEnvios(IDEnvio),
     IDEstadoPedido tinyint not null foreign key references EstadoDePedidos(IDEstadoPedido),
     FechaDePedido datetime not null default Getdate(),
-    PrecioTotal money not null,
+    PrecioTotal money null,
     IDPago int not null foreign key references DetalleDePagos(IDPago)
 )
 
@@ -101,7 +101,7 @@ create table DetalleDePedidos (
     IDProducto int not null foreign key references Productos(IDProducto),
     Cantidad int not null check (Cantidad >= 1),
     PrecioUnitario money not null,
-    Subtotal money not null,
+    Subtotal money null,
     Impuestos tinyint not null default 21 check (Impuestos between 0 and 100),
     primary key (IDPedido, IDProducto)
 )
