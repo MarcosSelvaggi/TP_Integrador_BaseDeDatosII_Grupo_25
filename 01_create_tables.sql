@@ -8,77 +8,100 @@ go
 Use Ecommerce_DB
 go
 
-create table Rol(
-	IdRol tinyint primary key identity (1,1),
-	Descripcion VARCHAR(25) not null unique
-)
 
-create table Clientes(
-	IdCliente int primary key identity(1,1),
-	CorreoElectronico NVARCHAR(100) not null unique, 
-	Contraseña NVARCHAR(50) not null,
-	IdRol tinyint not null foreign key references Rol(IdRol),
-	Activo bit not null default 1, 
-	FechaCreacion date not null default Getdate(),
-	Documento int not null unique, 
-	Nombre VARCHAR(100) not null, 
-	Apellido VARCHAR(100) not null,
-	NumTelefono VARCHAR(20) not null, 
-	Direccion VARCHAR(100) not null
-)
-
-create table Categorias(
-	IdCategoria int primary key identity(1, 1),
-	Nombre varchar(50) not null unique
-)
-
-create table Marcas(
-	IdMarca int primary key identity(1, 1),
-	Nombre varchar(50) not null unique
-)
-
-create table Productos(
-	IdProducto int primary key identity(1, 1),
-    IdCategoria int not null foreign key references Categorias(IdCategoria),
-	IdMarca int not null foreign key references Marcas(IdMarca),
-	Nombre varchar(100) not null unique,
-	Stock int not null check (Stock >= 0),
-	PrecioSinIva money not null,
-	PrecioConIva money null,
-	PorcentajeIVA tinyint not null check (PorcentajeIVA between 0 and 100),
-	Activo bit not null default 1
-)
-	
-create table EstadosPedidos (
-    IdEstadoPedido tinyint primary key identity(1,1),
+create table Rol (
+    IDRol tinyint primary key identity(1,1),
     Descripcion varchar(100) not null unique
 )
 
-create table MetodosPagos (
-    IdMetodoPago tinyint primary key identity(1,1),
-    Descripcion varchar(50) not null unique
+create table Usuarios (
+    IDUsuario int primary key identity(1,1),
+    IDRol tinyint not null foreign key references Rol(IDRol),
+    Email nvarchar(100) not null unique,
+    Contraseña nvarchar(100) not null,
+    FechaDeCreacion datetime not null default Getdate(),
+    Activo bit not null default 1
 )
 
-create table EstadosEnvio (
-    IdEnvio tinyint primary key identity(1,1),
+create table Clientes (
+    IDCliente int primary key identity(1,1),
+    IDUsuario int not null foreign key references Usuarios(IDUsuario),
+    NumeroDocumento varchar(50) not null unique,
+    TipoDocumento varchar(20) not null,
+    NumeroTelefono varchar(20) not null,
+    Nombre varchar(100) not null,
+    Apellido varchar(100) not null
+)
+
+create table Direcciones (
+    IDDireccion int primary key identity(1,1),
+    IDCliente int not null foreign key references Clientes(IDCliente),
+    Direccion varchar(255) not null,
+    Nombre varchar(100) not null
+)
+
+create table Categorias (
+    IDCategoria int primary key identity(1,1),
+    Nombre varchar(100) not null unique
+)
+
+create table Marcas (
+    IDMarca int primary key identity(1,1),
+    Nombre varchar(100) not null unique
+)
+
+create table Productos (
+    IDProducto int primary key identity(1,1),
+    IDMarca int not null foreign key references Marcas(IDMarca),
+    IDCategoria int not null foreign key references Categorias(IDCategoria),
+    Nombre varchar(100) not null unique,
+    Stock int not null check (stock >= 0),
+    PrecioSinImpuestos money not null,
+    PrecioConImpuestos money not null,
+    Impuestos tinyint not null default 21 check (Impuestos between 0 and 100),
+    Activo bit not null default 1
+)
+
+create table EstadoDePedidos (
+    IDEstadoPedido tinyint primary key identity(1,1),
     Descripcion varchar(100) not null unique
+)
+
+create table MetodosDePago (
+    IDMetodoPago tinyint primary key identity(1,1),
+    Descripcion varchar(100) not null unique
+)
+
+create table DetalleDePagos (
+    IDPago int primary key identity(1,1),
+    IDMetodoPago tinyint not null foreign key references MetodosDePago(IDMetodoPago),
+    FechaDePago datetime not null,
+    EstadoPago varchar(50) not null,
+    Detalles varchar(255) not null
+)
+
+create table EstadoDeEnvios (
+    IDEnvio int primary key identity(1,1),
+    FechaDeEnvio datetime not null,
+    Descripcion varchar(255) not null
 )
 
 create table Pedidos (
-    IdPedido bigint primary key identity(1,1),
-    IdCliente int foreign key references Clientes(IdCliente),
-    FechaPedido date not null default Getdate(),
-    IdEstadoPedido tinyint foreign key references EstadosPedidos(IdEstadoPedido),
-    IdMetodoPago tinyint foreign key references MetodosPagos(IdMetodoPago),
-    IdEnvio TINYINT foreign key references EstadosEnvio(IdEnvio),
-    PrecioTotal money null
+    IDPedido int primary key identity(1,1),
+    IDCliente int not null foreign key references Clientes(IDCliente),
+    IDEnvio int not null foreign key references EstadoDeEnvios(IDEnvio),
+    IDEstadoPedido tinyint not null foreign key references EstadoDePedidos(IDEstadoPedido),
+    FechaDePedido datetime not null default Getdate(),
+    PrecioTotal money not null,
+    IDPago int not null foreign key references DetalleDePagos(IDPago)
 )
 
-create table DetallePedidos (
-    IdPedido bigint not null foreign key references Pedidos(IdPedido),
-    IdProducto int not null foreign key references Productos(IdProducto),
-    Cantidad tinyint not null check (Cantidad >= 1),
+create table DetalleDePedidos (
+    IDPedido int not null foreign key references Pedidos(IDPedido),
+    IDProducto int not null foreign key references Productos(IDProducto),
+    Cantidad int not null check (Cantidad >= 1),
     PrecioUnitario money not null,
-    Subtotal money null,
-    primary key (IdPedido, IdProducto)
+    Subtotal money not null,
+    Impuestos tinyint not null default 21 check (Impuestos between 0 and 100),
+    primary key (IDPedido, IDProducto)
 )
