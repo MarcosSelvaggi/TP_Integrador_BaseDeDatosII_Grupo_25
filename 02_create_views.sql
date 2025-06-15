@@ -3,14 +3,15 @@ go
 
 create view VW_ClientesEstados as
 select
-	C.IdCliente,
-	C.Nombre + ', ' + C.Apellido as 'Nombre y Apellido',
-	C.CorreoElectronico,
-	R.Descripcion as 'Rol',
-	C.Activo
+    U.IDUsuario,
+    C.Nombre + ', ' + C.Apellido as 'Nombre y Apellido',
+    U.Email,
+    R.Descripcion AS Rol,
+    U.Activo
 from
-	Clientes C
-inner join Rol R on C.IdRol = R.IdRol;
+    Usuarios U
+inner join Clientes C on C.IDUsuario = U.IDUsuario
+inner join Rol R on U.IDRol = R.IDRol;
 go 
 select * from VW_ClientesEstados
 go

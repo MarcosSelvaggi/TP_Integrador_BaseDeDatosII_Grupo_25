@@ -1,21 +1,19 @@
 use Ecommerce_DB
 go
 
-create trigger TR_EliminarCliente on Clientes
+create or alter trigger TR_EliminarUsuario on Usuarios
 instead of delete
 as
 begin
 	begin try
-		update Clientes set Activo = 0
-		where IdCliente in (select IdCliente from deleted);
-		print('Cliente desactivado correctamente.')
+		update Usuarios set Activo = 0
+		where IDUsuario in (select IDUsuario from deleted);
+		print('Usuario eliminado correctamente.')
 	end try
 	begin catch
-		raiserror('Error al intentar desactivar el cliente', 16, 1)
+		raiserror('Error al intentar eliminar el Usuario', 16, 1)
 	end catch
 end
-
-delete Clientes where IdCliente = 15
 
 go
 create or alter trigger TR_DevolverStock on Pedidos

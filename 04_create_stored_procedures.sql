@@ -1,35 +1,46 @@
 use Ecommerce_DB
 go
 
-create procedure SP_AgregarCliente (
-	@CorreoElectronico NVARCHAR(100),
-    @Contraseña VARCHAR(50),
-    @IdRol TINYINT,
-    @Estado BIT,
-    @FechaCreacion DATE,
-    @Documento INT,
-    @Nombre VARCHAR(100),
-    @Apellido VARCHAR(100),
-    @NumTelefono VARCHAR(20),
-    @Direccion VARCHAR(100)
-	) as
+create or alter procedure SP_AgregarUsuario
+	@IDRol tinyint,
+    @Email nvarchar(100),
+    @Contraseña nvarchar(100),
+    @Activo bit,
+    @NumeroDocumento varchar(50),
+    @TipoDocumento varchar(20),
+	@NumeroTelefono varchar(20),
+    @Nombre varchar(100),
+    @Apellido varchar(100)
+as
 begin
-	begin try
-		insert into
-		Clientes (CorreoElectronico, Contraseña, IdRol, Activo, FechaCreacion, Documento, Nombre, Apellido, NumTelefono, Direccion)
-        values (
-            @CorreoElectronico, @Contraseña, @IdRol, @Estado, @FechaCreacion, @Documento, @Nombre, @Apellido, @NumTelefono, @Direccion);
+    begin try
+		begin transaction
 
-        print('Cliente agregado correctamente.');
+			insert into Usuarios (IDRol, Email, Contraseña, Activo)
+			values (@IDRol, @Email, @Contraseña, @Activo);
+
+			declare @IDUsuario int = scope_identity();
+
+			if @IDRol = 1
+			begin
+				insert into Clientes (IDUsuario, NumeroDocumento, TipoDocumento, NumeroTelefono, Nombre, Apellido)
+				values (@IDUsuario, @NumeroDocumento, @TipoDocumento, @NumeroTelefono, @Nombre, @Apellido);
+			end
+
+		commit transaction
+
+        print ('Usuario agregado correctamente.');
+
     end try
     begin catch
-        raiserror('Error al agregar el cliente',16, 1);
+		rollback transaction;
+        raiserror('Error al agregar el usuario', 16, 1);
     end catch
 end
 go
-exec SP_AgregarCliente 'lologuitar@gmail.com', '123456', 1, 1, '2025-09-09', 123456789, 'Moloc', 'Suarez', '212314', 'Calle bella 14';
-go
+exec SP_AgregarUsuario 1, 'pepeguy@gmail.com', 'juju1234', 1, 123456789, 'Argentino', '123456', 'Pepe', 'Lopez';
 
+go
 create or alter procedure sp_registrarPedido(
 	@IdCliente int, 
 	@IdMetodoPago tinyint 
