@@ -15,6 +15,8 @@ begin
 	end catch
 end
 
+
+-- Trigger que se encarga de devolver el stock cuando se cancela un pedido
 go
 create or alter trigger TR_DevolverStock on Pedidos
 after update 

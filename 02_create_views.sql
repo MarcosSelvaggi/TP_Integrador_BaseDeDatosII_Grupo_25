@@ -19,12 +19,13 @@ go
 create or alter view VW_PedidosPorMetodosDePago as 
 select 
 	MP.Descripcion ,count(*) as 'Cantidad'
-	from Pedidos P 
-	Inner join MetodoDePagos MP on P.IdMetodoPago = MP.IdMetodoPago
+	from DetalleDePagos DP 
+	Inner join MetodosDePago MP on DP.IDMetodoPago = MP.IdMetodoPago
 	group by MP.Descripcion
 GO 
 Select * from VW_PedidosPorMetodosDePago
 GO
+
 
 --Vista de Productos más vendidos
 create or alter view VW_ProductosMasVendidos as
