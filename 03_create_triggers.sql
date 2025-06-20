@@ -73,17 +73,19 @@ after insert, update
 as
 begin
     begin try
-        --  actualiza subtotal
-        update DetalleDePedidos
-		set Subtotal = Cantidad * PrecioUnitario
-		where exists (
-		select 1
-		from inserted
-		where inserted.IDPedido = DetalleDePedidos.IDPedido
-		and inserted.IDProducto = DetalleDePedidos.IDProducto
-		)
+        begin transaction
 
-        -- actualiza precio total del pedido
+        -- Actualiza subtotal
+        update DetalleDePedidos
+        set Subtotal = Cantidad * PrecioUnitario
+        where exists (
+            select 1
+            from inserted
+            where inserted.IDPedido = DetalleDePedidos.IDPedido
+              and inserted.IDProducto = DetalleDePedidos.IDProducto
+        )
+
+        -- Actualiza precio total del pedido
         update Pedidos
         set PrecioTotal = (
             select sum(Subtotal)
@@ -93,42 +95,77 @@ begin
         where IDPedido in (
             select IDPedido
             from inserted
-        );
+        )
 
-        -- si es insert resto el stock directamente
-        if not exists (select 1 from Deleted)
+        -- Si es Insert resto el stock directamente
+        if not exists (select 1 from deleted)
         begin
-            declare @IDProducto int
-			declare @Cantidad int
+            declare @IDProducto int;
+            declare @Cantidad int;
 
-            select top 1 @IDProducto = idproducto, @Cantidad = cantidad
+            select top 1 @IDProducto = IDProducto, @Cantidad = Cantidad
             from inserted;
 
+            -- Validación de stock suficiente antes de restar
+            if exists (
+                select 1
+                from Productos
+                where IDProducto = @IDProducto
+                  and (Stock - @Cantidad) < 0
+            )
+            begin
+                print('Stock insuficiente para realizar la operación (Insert).');
+                rollback transaction;
+                return;
+            end
+
+            -- Restar stock
             update Productos
             set Stock = Stock - @Cantidad
             where IDProducto = @IDProducto;
         end
         else
         begin
-            -- si es update, calculo la diferencia entre cantidad nueva y vieja
-            declare @IDProductoActualizado int
-			declare @Cantidad_Nueva int
-			declare @Cantidad_Vieja int
+            -- Si es Update, calculo la diferencia entre cantidad nueva y vieja
+            declare @IDProductoActualizado int;
+            declare @Cantidad_Nueva int;
+            declare @Cantidad_Vieja int;
+            declare @Diferencia int;
 
-            select top 1 
-                @IDProductoActualizado = inserted.idproducto,
-                @Cantidad_Nueva = inserted.cantidad,
-                @Cantidad_Vieja = deleted.cantidad
+            select top 1
+                @IDProductoActualizado = inserted.IDProducto,
+                @Cantidad_Nueva = inserted.Cantidad,
+                @Cantidad_Vieja = deleted.Cantidad
             from inserted
-            inner join Deleted on inserted.idpedido = deleted.idpedido
-			and inserted.idproducto = deleted.idproducto
+            inner join deleted on inserted.IDPedido = deleted.IDPedido
+                and inserted.IDProducto = deleted.IDProducto;
 
+            set @Diferencia = @Cantidad_Nueva - @Cantidad_Vieja;
+
+            -- Validación de stock suficiente antes de ajustar
+            if exists (
+                select 1
+                from Productos
+                where IDProducto = @IDProductoActualizado
+                  and (Stock - @Diferencia) < 0
+            )
+            begin
+                print('Stock insuficiente para realizar la operación (Update).');
+                rollback transaction;
+                return;
+            end
+
+            -- Ajustar stock
             update Productos
-            set Stock = Stock - (@Cantidad_Nueva - @Cantidad_Vieja)
-            where IDProducto = @IDProductoActualizado
+            set Stock = Stock - @Diferencia
+            where IDProducto = @IDProductoActualizado;
         end
+
+        commit transaction
+
     end try
     begin catch
+        rollback transaction;
         raiserror('Error en trigger TR_ActualizarSubtotalPrecioTotalYStock', 16, 1);
     end catch
 end;
