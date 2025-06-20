@@ -126,18 +126,18 @@ insert into Pedidos (IDCliente, IDEnvio, IDEstadoPedido, FechaDePedido, PrecioTo
 (8, 1, 3, '2025-05-16', 890.75, 19),
 (4, 3, 2, '2025-05-17', 325.60, 20);
 --SIN SUBTOTAL
-insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values 
-(1, 1, 1, 423500),
-(1, 3, 2, 114950),
-(2, 5, 3, 1815),
-(3, 4, 1, 42350),
-(3, 6, 1, 1694),
-(4, 10, 1, 9680),
-(5, 2, 1, 338800),
-(6, 7, 1, 30250),
-(7, 8, 2, 21780),
-(8, 5, 6, 1815),
-(9, 9, 1, 60500),
-(10, 10, 3, 9680),
-(2, 1, 3, 100),
-(2, 3, 2, 1000);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (1, 1, 1, 423500);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (1, 3, 2, 114950);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (2, 5, 3, 1815);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (3, 4, 1, 42350);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (3, 6, 1, 1694);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (4, 10, 1, 9680);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (5, 2, 1, 338800);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (6, 7, 1, 30250);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (7, 8, 2, 21780);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (8, 5, 6, 1815);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (9, 9, 1, 60500);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (10, 10, 3, 9680);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (2, 1, 3, 100);
+insert into DetalleDePedidos (IDPedido, IDProducto, Cantidad, PrecioUnitario) values (2, 3, 2, 1000);
+
