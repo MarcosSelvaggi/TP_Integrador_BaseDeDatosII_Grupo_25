@@ -1,7 +1,7 @@
 use Ecommerce_DB
 go
 
-create view VW_ClientesEstados as
+create or alter view VW_ClientesEstados as
 select
     U.IDUsuario,
     C.Nombre + ', ' + C.Apellido as 'Nombre y Apellido',

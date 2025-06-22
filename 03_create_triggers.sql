@@ -15,7 +15,10 @@ begin
 	end catch
 end
 
-
+select * from pedidos
+select DP.IDPedido, DP.IDProducto, P.Nombre, DP.Cantidad, DP.PrecioUnitario, P.Stock
+from DetalleDePedidos DP 
+Inner join  Productos P on DP.IDProducto = P.IDProducto
 -- Trigger que se encarga de devolver el stock cuando se cancela un pedido
 go
 create or alter trigger TR_DevolverStock on Pedidos
@@ -23,7 +26,8 @@ after update
 as 
 --Inicio TR 
 BEGIN 
-	if((select IdEstadoPedido from inserted) = 4)
+	--El trigger sólo se lleva a cabo si el pedido fue Cancelado y si no estaba cancelado anteriormente 
+	if((select IdEstadoPedido from inserted) = 4 and (select IdEstadoPedido from deleted) != (select IdEstadoPedido from inserted))
 		--Inicio If
 		Begin
 			--Inicio transacción
@@ -32,16 +36,15 @@ BEGIN
 				begin try 
 					Declare @CantProductosUnicos tinyint; 
 					select @CantProductosUnicos = count(*) from DetalleDePedidos where IdPedido = (select IdPedido from inserted)
+					
 					Declare @aux tinyint = 0; 
 					While (@aux < @CantProductosUnicos)
 						--Inicio While
 						begin 
 							--Trae el ID del producto, salteando las filas que le pasa la variable auxiliar
 							Declare @IdProducto int; 
-							select @IdProducto = IdProducto 
-							from DetalleDePedidos 
-							order by IdProducto
-							offset @aux row fetch next 1 row only;
+							select @IdProducto = IdProducto from DetalleDePedidos where IDPedido = (select IDPedido from inserted)
+							order by IdProducto offset @aux row fetch next 1 row only;
 
 							--Usando el ID anterior sacamos la cantidad para después sumarla en el update siguiente 
 							Declare @cantidadProducto smallint; 
@@ -60,12 +63,15 @@ BEGIN
 				end catch 
 				--Fin catch
 			commit transaction 
-			print('Se ha cancelado el pedido satisfactoriamente y se hacen devuelto los productos.')
+			print('Se ha cancelado el pedido satisfactoriamente y se han devuelto los productos.')
 		end
 		--Fin If 
 END 
 --Fin TR
-GO
+update pedidos set IDEstadoPedido = 4 where IDPedido = 10
+
+
+Go
 --Trigger encargado de actualizar el Subtotal, el PrecioTotal y el Stock
 create or alter trigger TR_ActualizarSubtotalPrecioTotalYStock
 on DetalleDePedidos

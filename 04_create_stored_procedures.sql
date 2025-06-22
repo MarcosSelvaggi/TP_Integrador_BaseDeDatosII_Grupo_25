@@ -60,7 +60,7 @@ BEGIN
 
 			Insert into DetalleDePagos (IDMetodoPago, FechaDePago, EstadoPago, Detalles) 
 			values (@IdMetodoPago, GETDATE(), @EstadoDePago, CONCAT('Pago con ', @MetodoPago, ' Pedido - ', @IdDetallePagos)) 
-
+			
 			--Después de ingresar el detalle pago se usa el scope_identity para saber cuál es el IDPago que se ingresó último
 			insert into Pedidos (IDCliente, IDEnvio, IDEstadoPedido, FechaDePedido, PrecioTotal, IDPago)
 			values (@IdCliente, 1, 1, GETDATE(), 0, SCOPE_IDENTITY())
@@ -76,6 +76,8 @@ BEGIN
 END
 GO
 exec sp_registrarPedido 2, 1, 'Pendiente'
+select * from pedidos
+select * from DetalleDePagos
 
 go 
 select * from DetalleDePagos
