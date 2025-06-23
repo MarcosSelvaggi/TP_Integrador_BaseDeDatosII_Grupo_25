@@ -84,6 +84,7 @@ select * from DetalleDePagos
 select * from Pedidos
 
 GO
+
 create or alter procedure SP_InsertarProducto(
     @IdCategoria int,
     @IdMarca int,
@@ -96,15 +97,31 @@ as
 begin
     begin try
 		begin transaction
-			declare @PrecioConImpuestos money
-			--Calcula el PrecioConImpuestos
-			set @PrecioConImpuestos = @PrecioSinImpuestos * (1 + (@PorcentajeImpuestos / 100.0))
-			--Inserta el Producto con sus datos y el PrecioConImpuestos calculado
-			insert into Productos (IdCategoria, IdMarca, Nombre, Stock, PrecioSinImpuestos, PrecioConImpuestos, Impuestos, Activo)
-			values (@IdCategoria, @IdMarca, @Nombre, @Stock, @PrecioSinImpuestos, @PrecioConImpuestos, @PorcentajeImpuestos, @Activo)
+		--Validacion de precio no negativo
+		if (@PrecioSinImpuestos < 0)
+        begin
+            print('El precio sin impuestos no puede ser negativo.')
+            rollback transaction
+            return
+        end
 
-			commit transaction
-			print 'Producto insertado correctamente.'
+        -- Validación de porcentaje de impuestos entre 0 y 100
+        if (@PorcentajeImpuestos < 0 or @PorcentajeImpuestos > 100)
+        begin
+            print('El porcentaje de impuestos debe estar entre 0 y 100.')
+            rollback transaction
+            return
+        end
+			
+		declare @PrecioConImpuestos money
+		--Calcula el PrecioConImpuestos
+		set @PrecioConImpuestos = @PrecioSinImpuestos * (1 + (@PorcentajeImpuestos / 100.0))
+		--Inserta el Producto con sus datos y el PrecioConImpuestos calculado
+		insert into Productos (IdCategoria, IdMarca, Nombre, Stock, PrecioSinImpuestos, PrecioConImpuestos, Impuestos, Activo)
+		values (@IdCategoria, @IdMarca, @Nombre, @Stock, @PrecioSinImpuestos, @PrecioConImpuestos, @PorcentajeImpuestos, @Activo)
+
+		commit transaction
+		print 'Producto insertado correctamente.'
     end try
     begin catch
         raiserror('Error al insertar el producto', 16, 1)
@@ -113,3 +130,5 @@ begin
 end;
 GO
 exec SP_InsertarProducto 1, 1, 'Silla de escritorio', 10, 10000, 21, 1
+GO
+SELECT * FROM PRODUCTOS

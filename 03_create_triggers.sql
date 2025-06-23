@@ -119,7 +119,7 @@ begin
                 where IDProducto = @IDProducto and Stock < @Cantidad
             )
             begin
-                raiserror('Stock insuficiente para realizar la operación (Insert).', 16, 1);
+                print('Stock insuficiente para realizar la operación (Insert).');
                 rollback transaction;
                 return;
             end
@@ -144,7 +144,7 @@ begin
                 where IDProducto = @IDProducto and Stock < @Diferencia
             )
             begin
-                raiserror('Stock insuficiente para realizar la operación (Update).', 16, 1);
+                print('Stock insuficiente para realizar la operación (Update).')
                 rollback transaction;
                 return;
             end
@@ -162,5 +162,4 @@ begin
         raiserror('Error en trigger TR_ActualizarSubtotalPrecioTotalYStock', 16, 1);
     end catch
 end;
-
 
