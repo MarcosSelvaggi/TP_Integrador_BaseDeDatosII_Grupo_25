@@ -6,12 +6,10 @@ select
     U.IDUsuario,
     C.Nombre + ', ' + C.Apellido as 'Nombre y Apellido',
     U.Email,
-    R.Descripcion AS Rol,
     U.Activo
 from
     Usuarios U
-inner join Clientes C on C.IDUsuario = U.IDUsuario
-inner join Rol R on U.IDRol = R.IDRol;
+inner join Clientes C on C.IDUsuario = U.IDUsuario;
 go 
 select * from VW_ClientesEstados
 go

@@ -21,7 +21,7 @@ begin
 
 			declare @IDUsuario int = scope_identity();
 
-			if @IDRol = 1
+			if @IDRol = 2
 			begin
 				insert into Clientes (IDUsuario, NumeroDocumento, TipoDocumento, NumeroTelefono, Nombre, Apellido)
 				values (@IDUsuario, @NumeroDocumento, @TipoDocumento, @NumeroTelefono, @Nombre, @Apellido);
