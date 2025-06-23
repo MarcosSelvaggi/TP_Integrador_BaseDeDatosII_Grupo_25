@@ -84,22 +84,22 @@ select * from DetalleDePagos
 select * from Pedidos
 
 GO
-create or alter procedure SP_InsertarProducto
+create or alter procedure SP_InsertarProducto(
     @IdCategoria int,
     @IdMarca int,
     @Nombre varchar(100),
     @Stock int,
     @PrecioSinImpuestos money,
     @PorcentajeImpuestos tinyint,
-    @Activo bit
+    @Activo bit)
 as
 begin
     begin try
 		begin transaction
 			declare @PrecioConImpuestos money
-			--Calcula el PrecioConIva
+			--Calcula el PrecioConImpuestos
 			set @PrecioConImpuestos = @PrecioSinImpuestos * (1 + (@PorcentajeImpuestos / 100.0))
-			--Inserta el Producto con sus datos y el PrecioConIva calculado
+			--Inserta el Producto con sus datos y el PrecioConImpuestos calculado
 			insert into Productos (IdCategoria, IdMarca, Nombre, Stock, PrecioSinImpuestos, PrecioConImpuestos, Impuestos, Activo)
 			values (@IdCategoria, @IdMarca, @Nombre, @Stock, @PrecioSinImpuestos, @PrecioConImpuestos, @PorcentajeImpuestos, @Activo)
 
@@ -112,4 +112,4 @@ begin
     end catch
 end;
 GO
-exec SP_InsertarProducto 1, 1, 'Silla de escritorio', 10, 100, 21, 1
+exec SP_InsertarProducto 1, 1, 'Silla de escritorio', 10, 10000, 21, 1

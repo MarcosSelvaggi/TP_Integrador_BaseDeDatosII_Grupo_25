@@ -37,4 +37,4 @@ from DetalleDePedidos dp
 inner join Productos p on p.IdProducto = dp.IdProducto
 group by p.IdProducto, p.Nombre
 GO
-select * from VW_ProductosMasVendidos
+SELECT * FROM VW_ProductosMasVendidos

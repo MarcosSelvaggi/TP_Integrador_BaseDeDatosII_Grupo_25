@@ -79,48 +79,47 @@ after insert, update
 as
 begin
     begin try
-        begin transaction
+        begin transaction;
 
-        -- Actualiza subtotal
+        -- Variables
+        declare
+            @IDPedido int,
+            @IDProducto int,
+            @Cantidad int,
+            @CantidadVieja int,
+            @Diferencia int;
+
+        -- Obtener datos de la fila insertada/actualizada
+        select
+            @IDPedido = IDPedido,
+            @IDProducto = IDProducto,
+            @Cantidad = Cantidad
+        from inserted;
+
+        -- Calcular subtotal para esa fila
         update DetalleDePedidos
         set Subtotal = Cantidad * PrecioUnitario
-        where exists (
-            select 1
-            from inserted
-            where inserted.IDPedido = DetalleDePedidos.IDPedido
-              and inserted.IDProducto = DetalleDePedidos.IDProducto
-        )
+        where IDPedido = @IDPedido and IDProducto = @IDProducto;
 
-        -- Actualiza precio total del pedido
+        -- Actualizar precio total del pedido
         update Pedidos
         set PrecioTotal = (
             select sum(Subtotal)
             from DetalleDePedidos
-            where DetalleDePedidos.IDPedido = Pedidos.IDPedido
+            where IDPedido = @IDPedido
         )
-        where IDPedido in (
-            select IDPedido
-            from inserted
-        )
+        where IDPedido = @IDPedido;
 
-        -- Si es Insert resto el stock directamente
+        -- Si es insert
         if not exists (select 1 from deleted)
         begin
-            declare @IDProducto int;
-            declare @Cantidad int;
-
-            select top 1 @IDProducto = IDProducto, @Cantidad = Cantidad
-            from inserted;
-
-            -- Validación de stock suficiente antes de restar
+            -- Validar stock suficiente
             if exists (
-                select 1
-                from Productos
-                where IDProducto = @IDProducto
-                  and (Stock - @Cantidad) < 0
+                select 1 from Productos
+                where IDProducto = @IDProducto and Stock < @Cantidad
             )
             begin
-                print('Stock insuficiente para realizar la operación (Insert).');
+                raiserror('Stock insuficiente para realizar la operación (Insert).', 16, 1);
                 rollback transaction;
                 return;
             end
@@ -132,46 +131,36 @@ begin
         end
         else
         begin
-            -- Si es Update, calculo la diferencia entre cantidad nueva y vieja
-            declare @IDProductoActualizado int;
-            declare @Cantidad_Nueva int;
-            declare @Cantidad_Vieja int;
-            declare @Diferencia int;
+            -- Obtener cantidad vieja para calcular diferencia
+            select
+                @CantidadVieja = Cantidad
+            from deleted;
 
-            select top 1
-                @IDProductoActualizado = inserted.IDProducto,
-                @Cantidad_Nueva = inserted.Cantidad,
-                @Cantidad_Vieja = deleted.Cantidad
-            from inserted
-            inner join deleted on inserted.IDPedido = deleted.IDPedido
-                and inserted.IDProducto = deleted.IDProducto;
+            set @Diferencia = @Cantidad - @CantidadVieja;
 
-            set @Diferencia = @Cantidad_Nueva - @Cantidad_Vieja;
-
-            -- Validación de stock suficiente antes de ajustar
+            -- Validar stock suficiente para ajustar
             if exists (
-                select 1
-                from Productos
-                where IDProducto = @IDProductoActualizado
-                  and (Stock - @Diferencia) < 0
+                select 1 from Productos
+                where IDProducto = @IDProducto and Stock < @Diferencia
             )
             begin
-                print('Stock insuficiente para realizar la operación (Update).');
+                raiserror('Stock insuficiente para realizar la operación (Update).', 16, 1);
                 rollback transaction;
                 return;
             end
 
-            -- Ajustar stock
+            -- Ajustar stock según diferencia
             update Productos
             set Stock = Stock - @Diferencia
-            where IDProducto = @IDProductoActualizado;
+            where IDProducto = @IDProducto;
         end
 
-        commit transaction
-
+        commit transaction;
     end try
     begin catch
         rollback transaction;
         raiserror('Error en trigger TR_ActualizarSubtotalPrecioTotalYStock', 16, 1);
     end catch
 end;
+
+
